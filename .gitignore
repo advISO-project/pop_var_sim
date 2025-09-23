@@ -1,6 +1,6 @@
 .nextflow*
 .nf-test*
-./work
+work
 __pycache__
 scratch
 test*
