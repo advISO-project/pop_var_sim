@@ -8,16 +8,21 @@ workflow {
 
     check_params()
 
-    input_ch = parse_manifest(params.haplotype_manifest) // [[haplotype_label, fasta file, vcf file (optional), bed file (optional)]]
+    // [haplotype_label, base_fasta, [variants_file, bed_file], is_amplicon, amplicon_count]
+    input_ch = parse_manifest(params.haplotype_manifest)
 
     // GENERATE SIMREFS
     run_varianteer(input_ch)
 
-    haplotypes_ch = run_varianteer.out.haplotype_ch // [[haplotype_1, haplotype_1.fa], [haplotype_2, haplotype_2.fa]...]]
-    haplotypes_ch.view()
+    // [halotype_mutated.fa, haplotype_label, is_amplicon, num_amplicons]
+    haplotypes_ch = run_varianteer.out.haplotype_ch
 
-    sample_design_ch = parse_sample_design(params.sample_design_file) // [[sample_id, haplotype1, 0.7, total_num_reads*0.7], [sample_id, haplotype2, 0.3, total_num_reads*0.3]]
+    // [sample_id, haplotype_label, fraction_reads]
+    sample_design_ch = parse_sample_design(params.sample_design_file)
 
+    // [sample_id, haplotype_label, haplo_fasta, amplicon_fraction_reads, is_amplicon]
+    // OR
+    // [sample_id, haplotype_label, haplo_fasta, fraction_reads, is_amplicon]
     simulation_in_ch = sample_design_ch
                             .combine(haplotypes_ch, by:1)
                             .map{ haplotype_label, sample_id, num_reads, haplo_fasta, is_amplicon, num_amplicons ->
@@ -29,7 +34,7 @@ workflow {
                                     }
                                 }
 
-    run_art(simulation_in_ch) // run_art.out is like [[sample_1, sample_1.haplo1_1.fq, sample_1.haplo1_2.fq], [sample_1, sample_1.haplo2_1.fq, sample_1.haplo2_2.fq]]
+    run_art(simulation_in_ch) // run_art.out is like [sample_1, sample_1.haplo1_1.fq, sample_1.haplo1_2.fq]
 
     // collapse run_art.out so it is like [ [sample_1, [sample_1.haplo1_1.fq, sample_1.haplo2_1.fq], [sample_1.haplo1_2.fq, sample_1.haplo2_2.fq]] ]
     grouped_ch = run_art.out.map { sample_id, fq1, fq2 ->
@@ -113,8 +118,7 @@ def parse_manifest(manifest_path) {
     return haplotype_manifest_ch
 }
 
-def parse_sample_design(sample_design_file) { // lines in file: [sample_id, (haplotype1, haplotype2), (0.7, 0.3), total_num_reads]
-    // String sample_design_json = new File(sample_design_file).getText('UTF-8')
+def parse_sample_design(sample_design_file) {
     def json_slurper = new groovy.json.JsonSlurper()
     def json_data = json_slurper.parse(new File(sample_design_file))
     def flattened_design_data = []

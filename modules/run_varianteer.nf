@@ -4,7 +4,6 @@ process run_varianteer {
         tuple val(haplotype_label), path(fasta_file), val(amp_and_var_files), val(is_amplicon), val(num_amplicons)
 
     output:
-        // tuple val(haplotype_label), path("*_mutated.fasta")
         tuple path("${haplotype_label}*_mutated.fa"), val(haplotype_label), val(is_amplicon), val(num_amplicons), emit: haplotype_ch
 
 
