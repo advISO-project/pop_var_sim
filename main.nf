@@ -69,14 +69,6 @@ workflow {
 
 }
 
-def _get_abs_path(in_path) {
-    def file_path = new File(in_path)
-    def abs_path = file_path.getAbsolutePath()
-    def abs_str = new String(abs_path)
-
-    return abs_str
-}
-
 def check_params() {
     return 0
 }
