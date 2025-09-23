@@ -44,7 +44,7 @@ haplotype_5 , ref_5.fa   ,                , regions_5.bed
 - `haplotype` `[REQUIRED, UNIQUE VALUES EXPECTED]`: An alphanumeric string used as the label for this particular simulation reference
 - `base_fasta` `[REQUIRED, NON-UNIQUE VALUES ALLOWED]`: Path to the reference fasta which will be the basis of the simulation reference
 - `variants_file` `[OPTIONAL, NON-UNIQUE VALUES ALLOWED]`: Path to a (VCF-like) TSV file containing variant information (1-based coordinates) [OPTIONAL]
-- `bed_file`` [OPTIONAL, NON-UNIQUE VALUES ALLOWED]`: Path to Path to a (BED-like) TSV file containing amplicon start/end coordinates (0-based coordinates)
+- `bed_file` `[OPTIONAL, NON-UNIQUE VALUES ALLOWED]`: Path to Path to a (BED-like) TSV file containing amplicon start/end coordinates (0-based coordinates)
 
 All column names are expected and required in the header. However, leaving values in `variants_file` and `bed_file` is allowed. If neither is specified, the simulation reference is the same as the base fasta file. If only a variants file is specified, the simulation reference will be a "mutated" whole-genome. If only a BED file is specified, the simulation reference will be a collection of amplicons with no "mutations".
 
