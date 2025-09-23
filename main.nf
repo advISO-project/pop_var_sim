@@ -55,7 +55,6 @@ workflow {
 
     merge_files.out
             .map { it ->
-                    println(it)
                     tuple(it[1], it[2])
                 }
             .collect()
