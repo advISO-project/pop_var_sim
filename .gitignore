@@ -1,0 +1,6 @@
+.nextflow*
+.nf-test*
+./work
+__pycache__
+scratch
+test*
