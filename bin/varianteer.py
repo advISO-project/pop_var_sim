@@ -137,7 +137,7 @@ class Varianteer():
                 with open(f"{outfile_name}_mutated.fa", "w") as outfile_handle:
                     for k, v in self.mutated_data.items():
                         outfile_handle.write(f">{k}\n")
-                        outfile_handle.write(f"{v["mutated"]}\n")
+                        outfile_handle.write(f"{v['mutated']}\n")
 
                 outfile_handle.close()
                 print(f"Wrote fasta file with mutations to: {outfile_name}_mutated.fa")
@@ -147,10 +147,10 @@ class Varianteer():
                 mut_amp_file = open(f"{outfile_name}_amp_mutated.fa", "w")
                 for k, v in self.mutated_data.items():
                     orig_amp_file.write(f">{k}\n")
-                    orig_amp_file.write(f"{v["original"]}\n")
+                    orig_amp_file.write(f"{v['original']}\n")
 
                     mut_amp_file.write(f">{k}\n")
-                    mut_amp_file.write(f"{v["mutated"]}\n")
+                    mut_amp_file.write(f"{v['mutated']}\n")
 
                 print(f"Wrote fasta file with non-mutated amplicons to: {outfile_name}_amp.fa")
                 print(f"Wrote fasta file with mutated amplicons to: {outfile_name}_amp_mutated.fa")
