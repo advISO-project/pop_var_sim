@@ -53,13 +53,3 @@ chrom_1	  528859	529104	 chrom_1-528859-529104-amplicon
 chrom_1	  535965	536239	 chrom_1-535965-536239-amplicon
 ```
 ---
-
-# TODO
-
-## Features
-- [ ] Add support for non-SNP variants
-
-## Development
-- [ ] Add docstrings to functions
-- [ ] Add unit tests
-- [ ] Pull code out into own repo
