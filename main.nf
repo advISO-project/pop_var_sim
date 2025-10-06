@@ -68,10 +68,6 @@ workflow {
 
 }
 
-def check_params() {
-    return 0
-}
-
 def parse_manifest(manifest_path) {
     def rows = Channel
                         .fromPath(manifest_path)
