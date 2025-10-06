@@ -6,8 +6,6 @@ nextflow.enable.dsl = 2
 
 workflow {
 
-    check_params()
-
     // [haplotype_label, base_fasta, [variants_file, bed_file], is_amplicon, amplicon_count]
     input_ch = parse_manifest(params.haplotype_manifest)
 
