@@ -1,0 +1,9 @@
+haplotype,base_fasta,variants_file,bed_file
+chrom_1,pf3d7_complete_reheader.fa,pf3d7_chr1.vcf,pf3d7_chr1.bed
+chrom_2,pf3d7_complete_reheader.fa,pf3d7_chr2.vcf,pf3d7_chr2.bed
+chrom_3,pf3d7_complete_reheader.fa,pf3d7_chr3.vcf,pf3d7_chr3.bed
+chrom_4,pf3d7_complete_reheader.fa,pf3d7_chr4.vcf,pf3d7_chr4.bed
+chrom_5,pf3d7_complete_reheader.fa,pf3d7_chr5.vcf,pf3d7_chr5.bed
+chrom_1_wgs_var,pf3d7_complete_reheader.fa,pf3d7_chr1.vcf,null
+chrom_1_amp_no_var,pf3d7_complete_reheader.fa,null,pf3d7_chr1.bed
+chrom_1_wgs_no_var,pf3d7_complete_reheader.fa,null,null
