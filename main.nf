@@ -6,6 +6,26 @@ nextflow.enable.dsl = 2
 
 workflow {
 
+  /*
+  * ANSI escape codes to color output messages
+  */
+  ANSI_GREEN = "\033[1;32m"
+  ANSI_RED = "\033[1;31m"
+  ANSI_RESET = "\033[0m"
+  _ANSI_BOLD = "\033[1m"
+
+log.info "${_ANSI_BOLD}Starting read simulation pipeline...${ANSI_RESET}"
+log.info """
+  Runtime data:
+  -------------------------------------------
+  Running with profile:   ${ANSI_GREEN}${workflow.profile}${ANSI_RESET}
+  Run container:          ${ANSI_GREEN}${workflow.container}${ANSI_RESET}
+  Running as user:        ${ANSI_GREEN}${workflow.userName}${ANSI_RESET}
+  Launch dir:             ${ANSI_GREEN}${workflow.launchDir}${ANSI_RESET}
+  Base dir:               ${ANSI_GREEN}${baseDir}${ANSI_RESET}
+  ------------------------------------------
+""".stripIndent()
+
     // [haplotype_label, base_fasta, [variants_file, bed_file], is_amplicon, amplicon_count]
     input_ch = parse_manifest(params.haplotype_manifest)
 
@@ -64,6 +84,26 @@ workflow {
 
     run_multiqc(params.run_name, run_fastqc.out.fastqc_zips)
 
+    workflow.onComplete = {
+        // Log colors ANSI codes
+        /*
+        * ANSI escape codes to color output messages
+        */
+
+        println """
+        Pipeline execution summary
+        ---------------------------
+        Completed at : ${ANSI_GREEN}${workflow.complete}${ANSI_RESET}
+        Duration     : ${ANSI_GREEN}${workflow.duration}${ANSI_RESET}
+        Success      : ${workflow.success ? ANSI_GREEN : ANSI_RED}${workflow.success}${ANSI_RESET}
+        Results Dir  : ${ANSI_GREEN}${file(params.outdir)}${ANSI_RESET}
+        Work Dir     : ${ANSI_GREEN}${workflow.workDir}${ANSI_RESET}
+        Exit status  : ${ANSI_GREEN}${workflow.exitStatus}${ANSI_RESET}
+        Error report : ${ANSI_GREEN}${workflow.errorReport ?: '-'}${ANSI_RESET}
+        """.stripIndent()
+    }
+
+
 }
 
 def parse_manifest(manifest_path) {
@@ -82,13 +122,13 @@ def parse_manifest(manifest_path) {
                                             def amplicon_count = null
                                             def is_amplicon = false
 
-                                            if (variants_file_val == ""){
+                                            if (variants_file_val == "null"){
                                                     variants_file = null
                                                 } else {
                                                     variants_file = file(row.variants_file)
                                                 }
 
-                                            if (bed_file_val == ""){
+                                            if (bed_file_val == "null"){
                                                     bed_file = null
                                                 } else {
                                                     is_amplicon = true
