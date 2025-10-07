@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://raw.githubusercontent.com/ARD Read Simulation Pipeline//nextflow_schema.json",
-  "title": "ARD Read Simulation Pipeline pipeline parameters",
+  "$id": "https://gitlab.internal.sanger.ac.uk/malariagen1/misc_utils/read_sim_pipeline/nextflow_schema.json",
+  "title": "Read Simulation Pipeline parameters",
   "description": "A pipeline to simulate reads from references containing user-specified mutations.",
   "type": "object",
   "$defs": {
@@ -29,17 +29,20 @@
   ],
   "properties": {
     "haplotype_manifest": {
-      "type": "string"
+      "type": "string",
+      "description": "Path to the haplotype manifest file."
     },
     "sample_design_file": {
-      "type": "string"
+      "type": "string",
+      "description": "Path to the sample design file."
     },
     "run_name": {
-      "type": "string"
+      "type": "string",
+      "description": "Name of the run."
     },
     "_trace_timestamp": {
       "type": "string",
-      "default": "2025-10-07_12-40-17"
+      "description": "Timestamp for tracing."
     }
   }
 }

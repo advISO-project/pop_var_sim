@@ -2,29 +2,25 @@
 include {run_varianteer} from "./modules/run_varianteer.nf"
 include {run_art} from "./modules/run_simulation.nf"
 include {merge_files; write_output_manifest; run_fastqc; run_multiqc} from "./modules/prepare_outputs.nf"
+include { validateParameters; paramsSummaryLog} from 'plugin/nf-schema'
+
 nextflow.enable.dsl = 2
 
 workflow {
 
-  /*
-  * ANSI escape codes to color output messages
-  */
-  ANSI_GREEN = "\033[1;32m"
-  ANSI_RED = "\033[1;31m"
-  ANSI_RESET = "\033[0m"
-  _ANSI_BOLD = "\033[1m"
+    /*
+    * ANSI escape codes to color output messages
+    */
+    ANSI_GREEN = "\033[1;32m"
+    ANSI_RED = "\033[1;31m"
+    ANSI_RESET = "\033[0m"
+    _ANSI_BOLD = "\033[1m"
 
-log.info "${_ANSI_BOLD}Starting read simulation pipeline...${ANSI_RESET}"
-log.info """
-  Runtime data:
-  -------------------------------------------
-  Running with profile:   ${ANSI_GREEN}${workflow.profile}${ANSI_RESET}
-  Run container:          ${ANSI_GREEN}${workflow.container}${ANSI_RESET}
-  Running as user:        ${ANSI_GREEN}${workflow.userName}${ANSI_RESET}
-  Launch dir:             ${ANSI_GREEN}${workflow.launchDir}${ANSI_RESET}
-  Base dir:               ${ANSI_GREEN}${baseDir}${ANSI_RESET}
-  ------------------------------------------
-""".stripIndent()
+    log.info "${_ANSI_BOLD}Starting read simulation pipeline...${ANSI_RESET}"
+    // Validate input parameters
+    validateParameters()
+    // Print summary of supplied parameters
+    log.info paramsSummaryLog(workflow)
 
     // [haplotype_label, base_fasta, [variants_file, bed_file], is_amplicon, amplicon_count]
     input_ch = parse_manifest(params.haplotype_manifest)
