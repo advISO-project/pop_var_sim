@@ -1,5 +1,10 @@
 nextflow.enable.dsl = 2
 process run_varianteer {
+    /*
+    * Runs Varianteer to simulate variants in a given haplotype.
+    */
+
+    tag { haplotype_label }
     input:
         tuple val(haplotype_label), path(fasta_file), val(amp_and_var_files), val(is_amplicon), val(num_amplicons)
 
@@ -21,11 +26,12 @@ process run_varianteer {
         }
         def arg_str = args.join(" ")
 
+        // If no VCF or BED file is provided, just copy the original FASTA to the output with the new name
         if (vcf_file == null && bed_file == null)
             """
             cp $fasta_file "${haplotype_label}_mutated.fa"
             """
-
+        // Otherwise, run Varianteer with the provided arguments
         else
             """
             run_varianteer.py \
