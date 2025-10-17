@@ -33,8 +33,8 @@ haplotype   , base_fasta , variants_file  , bed_file
 haplotype_1 , ref_1.fa   , variants_1.vcf , regions_1.bed
 haplotype_2 , ref_2.fa   , variants_2.vcf , regions_2.bed
 haplotype_3 , ref_3.fa   , variants_3.vcf , regions_3.bed
-haplotype_4 , ref_4.fa   , variants_4.vcf ,
-haplotype_5 , ref_5.fa   ,                , regions_5.bed
+haplotype_4 , ref_4.fa   , variants_4.vcf , null
+haplotype_5 , ref_5.fa   , null           , regions_5.bed
 ```
 
 > NB: The values in the columns `base_fasta`, `variants_file`, and `bed_file` are expected to be paths to the respective files - the most robust option here is to use absolute paths.

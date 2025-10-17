@@ -1,0 +1,50 @@
+[
+    {
+        "sample_id": "sample_1",
+        "genotypes": ["chrom_1", "chrom_2"],
+        "proportions": [0.7, 0.3],
+        "num_reads": 100000
+    },
+    {
+        "sample_id": "sample_2",
+        "genotypes": ["chrom_2", "chrom_3"],
+        "proportions": [0.6, 0.4],
+        "num_reads": 1000000
+    },
+    {
+        "sample_id": "sample_3",
+        "genotypes": ["chrom_2", "chrom_5"],
+        "proportions": [0.5, 0.5],
+        "num_reads": 10000
+    },
+    {
+        "sample_id": "sample_4",
+        "genotypes": ["chrom_1", "chrom_2", "chrom_4"],
+        "proportions": [0.2, 0.3, 0.5],
+        "num_reads": 100000
+    },
+    {
+        "sample_id": "sample_5",
+        "genotypes": ["chrom_3", "chrom_5", "chrom_1"],
+        "proportions": [0.3, 0.4, 0.3],
+        "num_reads": 100000
+    },
+    {
+        "sample_id": "sample_wgs_var",
+        "genotypes": ["chrom_1_wgs_var"],
+        "proportions": [1.0],
+        "num_reads": 100000
+    },
+    {
+        "sample_id": "sample_amp_no_var",
+        "genotypes": ["chrom_1_amp_no_var"],
+        "proportions": [1.0],
+        "num_reads": 100000
+    },
+    {
+        "sample_id": "sample_wgs_no_var",
+        "genotypes": ["chrom_1_wgs_no_var"],
+        "proportions": [1.0],
+        "num_reads": 100000
+    }
+]

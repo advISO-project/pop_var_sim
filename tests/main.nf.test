@@ -1,0 +1,70 @@
+
+def modifyPathsAndWriteCsv(String inputFile) {
+    def projectDir = System.getProperty("user.dir") + "/tests/test_data" // Current working directory
+
+    // Read CSV file
+    def lines = new File(inputFile).readLines()
+    // Modify paths and write to a new file
+    def outputFile = new File(inputFile.replaceAll("\\.csv", "_located.csv"))
+    def writer = new FileWriter(outputFile)
+
+    // Locate columns
+    lines.each { line ->
+        def columns = line.split(',')
+        if (columns[0]!="haplotype") {
+            columns[1] = "${ projectDir}/${columns[1] }"
+            // handle optional columns
+            if (columns[2]!="null") {
+                columns[2] = "${ projectDir}/${columns[2] }"
+            }
+            if (columns[3]!="null") {
+                columns[3] = "${projectDir}/${columns[3]}"
+            }
+        }
+        writer.write(columns.join(',')+"\n")
+    }
+    writer.close()
+    println("CSV file with located paths written to: ${outputFile}")
+}
+
+modifyPathsAndWriteCsv("tests/test_data/test_pf_haplotype_manifest.csv")
+
+nextflow_pipeline {
+
+    name "Test Workflow main.nf"
+    script "main.nf"
+    test("Should run without failures") {
+
+        when {
+            params {
+                haplotype_manifest="${projectDir}/tests/test_data/test_pf_haplotype_manifest_located.csv"
+                sample_design_file="${projectDir}/tests/test_data/test_pf_sample_manifest.json"
+                run_name = "test"
+            }
+        }
+
+        then {
+            assert workflow.success
+            def results_dir = "${launchDir}/results"
+            assert file("${results_dir}/test.manifest.csv").exists()
+            // count number of lines in manifest
+            def manifest_lines = file("${results_dir}/test.manifest.csv").readLines().size()
+            assert manifest_lines == 9 // header + 8 haplotypes
+
+            // check for the fastq files
+            assert file("${results_dir}/fastqs/sample_1_1.fq.gz").exists()
+            assert file("${results_dir}/fastqs/sample_1_2.fq.gz").exists()
+            assert file("${results_dir}/fastqs/sample_2_1.fq.gz").exists()
+            assert file("${results_dir}/fastqs/sample_2_2.fq.gz").exists()
+            assert file("${results_dir}/fastqs/sample_3_1.fq.gz").exists()
+            assert file("${results_dir}/fastqs/sample_3_2.fq.gz").exists()
+            assert file("${results_dir}/fastqs/sample_4_1.fq.gz").exists()
+            assert file("${results_dir}/fastqs/sample_4_2.fq.gz").exists()
+            assert file("${results_dir}/fastqs/sample_5_1.fq.gz").exists()
+            assert file("${results_dir}/fastqs/sample_5_2.fq.gz").exists()
+
+            // TODO check proportion of reads from each haplotype in the samples
+        }
+
+    }
+}

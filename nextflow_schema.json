@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://gitlab.internal.sanger.ac.uk/malariagen1/misc_utils/read_sim_pipeline/nextflow_schema.json",
+  "title": "Read Simulation Pipeline parameters",
+  "description": "A pipeline to simulate reads from references containing user-specified mutations.",
+  "type": "object",
+  "$defs": {
+    "input_output_options": {
+      "title": "Input/output options",
+      "type": "object",
+      "fa_icon": "fas fa-terminal",
+      "description": "Define where the pipeline should find input data and save output data.",
+      "required": ["outdir"],
+      "properties": {
+        "outdir": {
+          "type": "string",
+          "format": "directory-path",
+          "description": "The output directory where the results will be saved. You have to use absolute paths to storage on Cloud infrastructure.",
+          "fa_icon": "fas fa-folder-open",
+          "default": "./results"
+        }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "$ref": "#/$defs/input_output_options"
+    }
+  ],
+  "properties": {
+    "haplotype_manifest": {
+      "type": "string",
+      "description": "Path to the haplotype manifest file."
+    },
+    "sample_design_file": {
+      "type": "string",
+      "description": "Path to the sample design file."
+    },
+    "run_name": {
+      "type": "string",
+      "description": "Name of the run."
+    },
+    "_trace_timestamp": {
+      "type": "string",
+      "description": "Timestamp for tracing."
+    }
+  }
+}

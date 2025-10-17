@@ -1,0 +1,32 @@
+[
+    {
+        "sample_id": "sample_1",
+        "genotypes": ["haplotype_1", "haplotype_2"],
+        "proportions": [0.7, 0.3],
+        "num_reads": 100000
+    },
+    {
+        "sample_id": "sample_2",
+        "genotypes": ["haplotype_2", "haplotype_3"],
+        "proportions": [0.6, 0.4],
+        "num_reads": 1000000
+    },
+    {
+        "sample_id": "sample_3",
+        "genotypes": ["haplotype_2", "haplotype_5"],
+        "proportions": [0.5, 0.5],
+        "num_reads": 10000
+    },
+    {
+        "sample_id": "sample_4",
+        "genotypes": ["haplotype_1", "haplotype_2", "haplotype_4"],
+        "proportions": [0.2, 0.3, 0.5],
+        "num_reads": 100000
+    },
+    {
+        "sample_id": "sample_5",
+        "genotypes": ["haplotype_3", "haplotype_5", "haplotype_1"],
+        "proportions": [0.3, 0.4, 0.3],
+        "num_reads": 100000
+    }
+]
