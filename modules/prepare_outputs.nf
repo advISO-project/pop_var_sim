@@ -73,7 +73,7 @@ process run_fastqc {
     */
 
     input:
-        val(fq_list)
+        path(fq_list)
 
     output:
         path "*_fastqc.zip", emit: fastqc_zips
