@@ -107,14 +107,9 @@ chrom_1	  535965	536239	 chrom_1-535965-536239-amplicon
 ```
 ---
 
-# TODO
+# Roadmap for further development
 
 ## Features
 - [ ] Add support for non-SNP variants
 - [ ] Add support for defining amplicons using primer-sets instead of coordinates
 - [ ] Add support to enable the simulation of optional host-read contamination
-
-## Development
-- [ ] Review and clean up code
-- [ ] Add param-check function code
-- [ ] Add tests
