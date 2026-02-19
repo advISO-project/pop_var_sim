@@ -52,16 +52,11 @@ nextflow_pipeline {
             assert manifest_lines == 9 // header + 8 haplotypes
 
             // check for the fastq files
-            assert file("${results_dir}/fastqs/sample_1_1.fq.gz").exists()
-            assert file("${results_dir}/fastqs/sample_1_2.fq.gz").exists()
-            assert file("${results_dir}/fastqs/sample_2_1.fq.gz").exists()
-            assert file("${results_dir}/fastqs/sample_2_2.fq.gz").exists()
-            assert file("${results_dir}/fastqs/sample_3_1.fq.gz").exists()
-            assert file("${results_dir}/fastqs/sample_3_2.fq.gz").exists()
-            assert file("${results_dir}/fastqs/sample_4_1.fq.gz").exists()
-            assert file("${results_dir}/fastqs/sample_4_2.fq.gz").exists()
-            assert file("${results_dir}/fastqs/sample_5_1.fq.gz").exists()
-            assert file("${results_dir}/fastqs/sample_5_2.fq.gz").exists()
+            assert file("${results_dir}/fastqs/sample_1.fq.gz").exists()
+            assert file("${results_dir}/fastqs/sample_2.fq.gz").exists()
+            assert file("${results_dir}/fastqs/sample_3.fq.gz").exists()
+            assert file("${results_dir}/fastqs/sample_4.fq.gz").exists()
+            assert file("${results_dir}/fastqs/sample_5.fq.gz").exists()
 
             // TODO check proportion of reads from each haplotype in the samples
         }
