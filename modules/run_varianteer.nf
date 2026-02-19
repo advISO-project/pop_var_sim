@@ -1,4 +1,3 @@
-nextflow.enable.dsl = 2
 process run_varianteer {
     /*
     * Runs Varianteer to simulate variants in a given haplotype.

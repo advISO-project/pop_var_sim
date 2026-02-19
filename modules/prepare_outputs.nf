@@ -1,4 +1,3 @@
-nextflow.enable.dsl = 2
 process merge_files {
     /*
     * Merges multiple FASTQ files for each sample into single FASTQ files.
@@ -6,24 +5,22 @@ process merge_files {
     tag { sample_id }
 
     input:
-        tuple val(sample_id), path(fastq1), path(fastq2)
+        tuple val(sample_id), path(fastq_list)
 
     output:
-        tuple val(sample_id), path("${sample_id}_1.fq.gz"), path("${sample_id}_2.fq.gz")
+        tuple val(sample_id), path("${sample_id}.fq.gz")
 
     script:
         """
-        cat $fastq1 > ${sample_id}_1.fq
-        cat $fastq2 > ${sample_id}_2.fq
+        merge_fastqs.py ${sample_id}.fq ${fastq_list}
 
-        gzip ${sample_id}_1.fq
-        gzip ${sample_id}_2.fq
+        gzip ${sample_id}.fq
         """
 
     stub:
         """
-        cat $fastq1 > ${sample_id}_1.fq.gz
-        cat $fastq2 > ${sample_id}_2.fq.gz
+        touch ${sample_id}.fq
+        gzip ${sample_id}.fq
         """
 }
 
@@ -40,7 +37,7 @@ process write_output_manifest {
         path("${run_name}.manifest.csv")
 
     script:
-        def header = "sample_id,fastq_1,fastq2"
+        def header = "sample_id,fastq_path"
         def csvFile = file("out.csv")
 
         csvFile.withWriter { writer ->
@@ -49,11 +46,9 @@ process write_output_manifest {
                 .sort{ a, b -> a[0] <=> b[0] }
                 .each { row ->
                     def row_sample_id = row[0]
-                    def f1 = (row[1]).name
-                    def f2 = (row[2]).name
-                    def path1 = file("${params.outdir}/fastqs/$f1")
-                    def path2 = file("${params.outdir}/fastqs/$f2")
-                    def line = "$row_sample_id,$path1,$path2"
+                    def fq = (row[1]).name
+                    def fq_path = file("${params.outdir}/fastqs/$fq")
+                    def line = "$row_sample_id,$fq_path"
                     writer.writeLine(line)
                 }
         }
@@ -98,8 +93,8 @@ process run_multiqc {
         path "${run_name}.multiqc_report.html", emit: multiqc_html
 
     script:
-        """
-        multiqc .
+        """ 
+        multiqc --no-data-dir .
         mv multiqc_report.html ${run_name}.multiqc_report.html
         """
 }

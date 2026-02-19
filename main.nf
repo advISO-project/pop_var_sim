@@ -2,21 +2,13 @@
 include {run_varianteer} from "./modules/run_varianteer.nf"
 include {run_art} from "./modules/run_simulation.nf"
 include {merge_files; write_output_manifest; run_fastqc; run_multiqc} from "./modules/prepare_outputs.nf"
-include { validateParameters; paramsSummaryLog} from 'plugin/nf-schema'
+include {validateParameters; paramsSummaryLog} from 'plugin/nf-schema'
 
 nextflow.enable.dsl = 2
 
 workflow {
 
-    /*
-    * ANSI escape codes to color output messages
-    */
-    ANSI_GREEN = "\033[1;32m"
-    ANSI_RED = "\033[1;31m"
-    ANSI_RESET = "\033[0m"
-    _ANSI_BOLD = "\033[1m"
-
-    log.info "${_ANSI_BOLD}Starting read simulation pipeline...${ANSI_RESET}"
+    log.info "Starting read simulation pipeline..."
     // Validate input parameters
     validateParameters()
     // Print summary of supplied parameters
@@ -38,28 +30,28 @@ workflow {
     // OR
     // [sample_id, haplotype_label, haplo_fasta, fraction_reads, is_amplicon]
     simulation_in_ch = sample_design_ch
-                            .combine(haplotypes_ch, by:1)
-                            .map{ haplotype_label, sample_id, num_reads, haplo_fasta, is_amplicon, num_amplicons ->
-                                    if (is_amplicon) {
-                                        def amplicon_fraction_reads = Math.round(num_reads/num_amplicons)
-                                        tuple(sample_id, haplotype_label, haplo_fasta, amplicon_fraction_reads, is_amplicon)
-                                    } else {
-                                        tuple(sample_id, haplotype_label, haplo_fasta, Math.round(num_reads), is_amplicon)
-                                    }
-                                }
+        .combine(haplotypes_ch, by:1)
+        .map { 
+            haplotype_label, sample_id, num_reads, haplo_fasta, is_amplicon, num_amplicons ->
+                if (is_amplicon) {
+                    def amplicon_fraction_reads = Math.round(num_reads/num_amplicons)
+                    tuple(sample_id, haplotype_label, haplo_fasta, amplicon_fraction_reads, is_amplicon)
+                } else {
+                    tuple(sample_id, haplotype_label, haplo_fasta, Math.round(num_reads), is_amplicon)
+                }
+        }
 
     run_art(simulation_in_ch) // run_art.out is like [sample_1, sample_1.haplo1_1.fq, sample_1.haplo1_2.fq]
 
-    // collapse run_art.out so it is like [ [sample_1, [sample_1.haplo1_1.fq, sample_1.haplo2_1.fq], [sample_1.haplo1_2.fq, sample_1.haplo2_2.fq]] ]
-    grouped_ch = run_art.out.map { sample_id, fq1, fq2 ->
-                                tuple([sample_id, '1', fq1], [sample_id, '2', fq2])
-                            }
-                        .flatMap()
-                        .groupTuple(by: [0, 1])
-                        .groupTuple(by: [0])
-                        .map {sample_id, __, file_list ->
-                                tuple(sample_id, file_list[0], file_list[1])
-                            }
+    // collapse run_art.out so it is like [sample_1, [sample_1.haplo1_1.fq, sample_1.haplo1_2.fq, sample_1.haplo2_1.fq, sample_1.haplo2_2.fq, ...] 
+    grouped_ch = run_art.out.map { 
+            sample_id, fq1, fq2 -> tuple(sample_id, [fq1, fq2]) 
+        }
+        .groupTuple(by: 0)
+        .map { 
+            sample_id, pairs -> 
+                tuple(sample_id, pairs.toList().flatten()) 
+        } 
 
     merge_files(grouped_ch)
 
@@ -68,12 +60,9 @@ workflow {
         .set{ manifest_lines_ch }
 
     merge_files.out
-            .map { it ->
-                    tuple(it[1], it[2])
-                }
-            .collect()
-            .set{fastqc_ch}
-
+        .map { _sample_id, fastq -> tuple(fastq) }
+        .collect()
+        .set{fastqc_ch}
 
     write_output_manifest(params.run_name, manifest_lines_ch)
     run_fastqc(fastqc_ch)
@@ -81,59 +70,53 @@ workflow {
     run_multiqc(params.run_name, run_fastqc.out.fastqc_zips)
 
     workflow.onComplete = {
-        // Log colors ANSI codes
-        /*
-        * ANSI escape codes to color output messages
-        */
-
         println """
         Pipeline execution summary
         ---------------------------
-        Completed at : ${ANSI_GREEN}${workflow.complete}${ANSI_RESET}
-        Duration     : ${ANSI_GREEN}${workflow.duration}${ANSI_RESET}
-        Success      : ${workflow.success ? ANSI_GREEN : ANSI_RED}${workflow.success}${ANSI_RESET}
-        Results Dir  : ${ANSI_GREEN}${file(params.outdir)}${ANSI_RESET}
-        Work Dir     : ${ANSI_GREEN}${workflow.workDir}${ANSI_RESET}
-        Exit status  : ${ANSI_GREEN}${workflow.exitStatus}${ANSI_RESET}
-        Error report : ${ANSI_GREEN}${workflow.errorReport ?: '-'}${ANSI_RESET}
+        Completed at : ${workflow.complete}
+        Duration     : ${workflow.duration}
+        Success      : ${workflow.success}
+        Results Dir  : ${file(params.outdir)}
+        Work Dir     : ${workflow.workDir}
+        Exit status  : ${workflow.exitStatus}
+        Error report : ${workflow.errorReport ?: '-'}
         """.stripIndent()
     }
-
-
 }
 
 def parse_manifest(manifest_path) {
     def rows = Channel
-                        .fromPath(manifest_path)
-                        .splitCsv(header: true, sep: ',')
+        .fromPath(manifest_path)
+        .splitCsv(header: true, sep: ',')
 
-    def haplotype_manifest_ch = rows.map { row ->
-                                            def haplotype_label = row.haplotype.trim().toLowerCase().toString()
-                                            def base_fasta = file(row.base_fasta)
-                                            def variants_file_val = row.variants_file
-                                            def bed_file_val = row.bed_file
+    def haplotype_manifest_ch = rows.map { 
+        row ->
+            def haplotype_label = row.haplotype.trim().toLowerCase().toString()
+            def base_fasta = file(row.base_fasta)
+            def variants_file_val = row.variants_file
+            def bed_file_val = row.bed_file
 
-                                            def variants_file = null
-                                            def bed_file = null
-                                            def amplicon_count = null
-                                            def is_amplicon = false
+            def variants_file = null
+            def bed_file = null
+            def amplicon_count = null
+            def is_amplicon = false
 
-                                            if (variants_file_val == "null"){
-                                                    variants_file = null
-                                                } else {
-                                                    variants_file = file(row.variants_file)
-                                                }
+            if (variants_file_val == "null") {
+                variants_file = null
+            } else {
+                variants_file = file(row.variants_file)
+            }
 
-                                            if (bed_file_val == "null"){
-                                                    bed_file = null
-                                                } else {
-                                                    is_amplicon = true
-                                                    bed_file = file(row.bed_file)
-                                                    amplicon_count = bed_file.readLines().size() - 1
-                                                }
+            if (bed_file_val == "null"){
+                bed_file = null
+            } else {
+                is_amplicon = true
+                bed_file = file(row.bed_file)
+                amplicon_count = bed_file.readLines().size() - 1
+            }
 
-                                            tuple(haplotype_label, base_fasta, [variants_file, bed_file], is_amplicon, amplicon_count)
-                                    }
+            tuple(haplotype_label, base_fasta, [variants_file, bed_file], is_amplicon, amplicon_count)
+    }
 
 
     return haplotype_manifest_ch
@@ -144,20 +127,21 @@ def parse_sample_design(sample_design_file) {
     def json_data = json_slurper.parse(new File(sample_design_file))
     def flattened_design_data = []
 
-    json_data.each { entry ->
-                        def sample_id = entry.sample_id
-                        def haplotypes = entry.genotypes
-                        def proportions = entry.proportions
-                        def num_reads = entry.num_reads
+    json_data.each { 
+        entry ->
+            def sample_id = entry.sample_id
+            def haplotypes = entry.genotypes
+            def proportions = entry.proportions
+            def num_reads = entry.num_reads
 
-                    haplotypes.eachWithIndex {
-                                                haplotype, i ->
-                                                    def hap_proportion = proportions[i]
-                                                    def fraction_reads = num_reads * hap_proportion
+            haplotypes.eachWithIndex {
+                haplotype, i ->
+                    def hap_proportion = proportions[i]
+                    def fraction_reads = num_reads * hap_proportion
 
-                                                flattened_design_data << [sample_id, haplotype.trim().toLowerCase().toString(), fraction_reads]
-                                            }
-                    }
+                    flattened_design_data << [sample_id, haplotype.trim().toLowerCase().toString(), fraction_reads]
+            }
+    }
 
     return Channel.from(flattened_design_data) // [[sample_id, haplotype1, haplotype_fraction_total_reads]]]
 }
