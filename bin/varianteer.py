@@ -25,23 +25,25 @@ class Varianteer():
             if not rec_id in self.regions.keys():
                 continue
             seq = record["seq"]
-            relevant_coords = [(int(c["START"]), int(c["END"]), c["amplicon_id"]) for c in self.regions[rec_id]]
+            relevant_coords = [(int(c["START"]) + 1, int(c["END"]), c["amplicon_id"]) for c in self.regions[rec_id]]
             relevant_variants = self.variants.get(rec_id, {})
 
-            self.amplicons = self._collect_amplicons_using_bed(seq, relevant_coords, relevant_variants)
+            self.amplicons = self._extract_amplicons(seq, relevant_coords, relevant_variants)
             for amp_id, amp_data in self.amplicons.items():
                 mutated = self.apply_mutations(amp_id, amp_data["seq"], amp_data["variants"])
                 self.mutated_data.update(mutated)
 
-    def _collect_amplicons_using_bed(self, seq: str, coords: list, variants: dict):
+    def _extract_amplicons(self, seq: str, coords: list, variants: dict):
         amplicons = {}
         for (amp_start, amp_end, amp_id) in coords:
-            variant_subset = [i for i in [variants.get(i, ()) for i in range(amp_start, amp_end+1)] if i]
+            variant_subset = [
+                v for pos, v in variants.items() if amp_start <= pos <= amp_end
+            ]
             if not variant_subset:
-                amplicons[amp_id] = {"start": amp_start, "end": amp_end, "seq": seq[amp_start:amp_end+1], "variants": []}
+                amplicons[amp_id] = {"start": amp_start, "end": amp_end, "seq": seq[amp_start-1:amp_end], "variants": []}
             else:
                 variant_subset_corrected = self._offset_variant_coords(variant_subset, amp_start)
-                amplicons[amp_id] = {"start": amp_start, "end": amp_end, "seq": seq[amp_start:amp_end+1], "variants": variant_subset_corrected}
+                amplicons[amp_id] = {"start": amp_start, "end": amp_end, "seq": seq[amp_start-1:amp_end], "variants": variant_subset_corrected}
 
         return amplicons
 
@@ -49,7 +51,7 @@ class Varianteer():
         # print(f"Original {variants = }")
         corrected_variants_list = []
         for (pos, ref, alt) in variants:
-            corrected_variants_list.append((pos-amp_start, ref, alt))
+            corrected_variants_list.append((pos - amp_start + 1, ref, alt))
         # print(f"{corrected_variants_list = }")
         return corrected_variants_list
 
@@ -85,18 +87,17 @@ class Varianteer():
 
             if len(seq) > chunk_size:
                 chunk_mutated_data = {}
-                seq_chunk_idxs = [i for i in range(0, len(seq), chunk_size)]
-
-                seq_chunk_idxs.append(len(seq))
-                seq_chunk_coords = [(seq_chunk_idxs[i], seq_chunk_idxs[i+1]) for i in range(len(seq_chunk_idxs)-1)]
-
+                seq_chunk_coords = [(i, min(i + chunk_size - 1, len(seq))) for i in range(1, len(seq) + 1, chunk_size)]
                 counter = 0
                 for (seq_chunk_start, seq_chunk_end) in seq_chunk_coords:
                     chunk_id = f"{rec_id}.{counter}"
                     chunk_variant_all = [rec_vars.get(i, ()) for i in range(seq_chunk_start, seq_chunk_end)]
                     chunk_variant_subset = [i for i in chunk_variant_all if i]
+                    chunk_variant_subset = [
+                        v for pos, v in rec_vars.items() if seq_chunk_start <= pos <= seq_chunk_end
+                    ]
                     corrected_chunk_variant_subset = self._offset_variant_coords(chunk_variant_subset, seq_chunk_start)
-                    seq_chunk = seq[seq_chunk_start:seq_chunk_end]
+                    seq_chunk = seq[seq_chunk_start-1:seq_chunk_end]
                     chunk_mutated_data.update(self.apply_mutations(chunk_id, seq_chunk, corrected_chunk_variant_subset))
                     counter += 1
 
@@ -120,10 +121,10 @@ class Varianteer():
         b_seq = bytearray(seq.encode("utf-8"))
         for pos, ref, alt in variants:
             try:
-                if seq[pos] != ref:
+                if seq[pos-1] != ref:
                     print(f"WARNING: in given sequence at position {pos}, expected {ref} but found {seq[pos]}")
 
-                b_seq[pos] = alt.encode("utf-8")[0]
+                b_seq[pos-1] = alt.encode("utf-8")[0]
 
                 mutated_data[seq_id] = {"original": seq, "mutated": b_seq.decode("utf-8")}
             except IndexError as ie:
