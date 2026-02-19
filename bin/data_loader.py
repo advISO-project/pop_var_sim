@@ -59,6 +59,7 @@ def _load_bed_file(bed_file):
         reader = csv.DictReader(bedfile_handle, delimiter="\t")
         for row in reader:
             chrom = row["#CHROM"]
+            # BED is half-open, so adjust start 
             start = row["START"]
             end = row["END"]
             row.update({"amplicon_id": f"{chrom}_{start}_{end}"})
@@ -84,7 +85,7 @@ def _load_vcf_file(vcf_file):
             found += 1
             chrom = row["#CHROM"]
             ## Adjust VCF coordinates: these are 1-indexed
-            pos = int(row["POS"]) - 1
+            pos = int(row["POS"])
             if chrom in variant_coords.keys():
                 variant_coords[chrom].append(pos)
                 coords_loaded += 1
