@@ -44,15 +44,13 @@ workflow {
     run_art(simulation_in_ch) // run_art.out is like [sample_1, sample_1.haplo1_1.fq, sample_1.haplo1_2.fq]
 
     // collapse run_art.out so it is like [sample_1, [sample_1.haplo1_1.fq, sample_1.haplo1_2.fq, sample_1.haplo2_1.fq, sample_1.haplo2_2.fq, ...] 
-    grouped_ch = run_art.out.map { 
-            sample_id, fq1, fq2 -> tuple(sample_id, [fq1, fq2]) 
-        }
-        .groupTuple(by: 0)
-        .map { 
-            sample_id, pairs -> 
-                tuple(sample_id, pairs.toList().flatten()) 
-        } 
 
+    grouped_ch = run_art.out
+        .flatMap { sample_id, fqs ->
+            def fq_list = fqs instanceof List ? fqs : [fqs] 
+            fq_list.collect { fq -> [sample_id, fq] } }
+        .groupTuple()
+ 
     merge_files(grouped_ch)
 
     merge_files.out

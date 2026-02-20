@@ -40,6 +40,10 @@
       "type": "string",
       "description": "Name of the run."
     },
+    "art_params": {
+      "type": "string",
+      "description": "Parameters for art."
+    },
     "_trace_timestamp": {
       "type": "string",
       "description": "Timestamp for tracing."

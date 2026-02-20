@@ -12,7 +12,7 @@ process merge_files {
 
     script:
         """
-        merge_fastqs.py ${sample_id}.fq ${fastq_list}
+        merge_fastqs.py -o ${sample_id}.fq ${fastq_list}
 
         gzip ${sample_id}.fq
         """

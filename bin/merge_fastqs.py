@@ -1,37 +1,74 @@
 #!/usr/bin/env python3
 
-import sys
+#!/usr/bin/env python3
+import argparse
+from pathlib import Path
+from collections import defaultdict
 
-def interleave_sample_pair(r1_path, r2_path, out_handle):
-    """Write a single sample's reads to the output interleaved file"""
-    with open(r1_path, 'r') as r1, open(r2_path, 'r') as r2:
+def interleave_pair(f1, f2, out_handle):
+    """Interleave reads from two FASTQ files."""
+    with open(f1, 'r') as fh1, open(f2, 'r') as fh2:
         while True:
-            r1_lines = [r1.readline() for _ in range(4)]
-            r2_lines = [r2.readline() for _ in range(4)]
+            # Read one FASTQ record (4 lines) from each file
+            r1 = [fh1.readline() for _ in range(4)]
+            r2 = [fh2.readline() for _ in range(4)]
 
-            # Stop at end of file
-            if not r1_lines[0] or not r2_lines[0]:
+            if not r1[0] or not r2[0]:
+                # End of either file
                 break
 
-            # Write interleaved reads
-            out_handle.writelines(r1_lines)
-            out_handle.writelines(r2_lines)
+            # Write interleaved
+            out_handle.writelines(r1)
+            out_handle.writelines(r2)
 
-def interleave_multiple_samples(pairs, out_path):
-    """Interleave all sample pairs into a single output file"""
-    with open(out_path, 'w') as out:
-        for r1_path, r2_path in pairs:
-            interleave_sample_pair(r1_path, r2_path, out)
+def write_single(fq, out_handle):
+    """Write single FASTQ file as-is."""
+    with open(fq, 'r') as fh:
+        for line in fh:
+            out_handle.write(line)
+
+def main():
+    parser = argparse.ArgumentParser(
+        description="Interleave paired FASTQs and add unpaired files"
+    )
+    parser.add_argument("-o", "--output", required=True, help="Output file name")
+    parser.add_argument("inputs", nargs='+', help="Input FASTQ files")
+
+    args = parser.parse_args()
+
+    # Group files by prefix
+    pairs = defaultdict(dict)  # prefix -> {'1': file, '2': file}
+    singles = []
+
+    for path in args.inputs:
+        fname = Path(path).name
+        if fname.endswith('_1.fq'):
+            prefix = fname.rsplit('_1.fq', 1)[0]
+            pairs[prefix]['1'] = path
+        elif fname.endswith('_2.fq'):
+            prefix = fname.rsplit('_2.fq', 1)[0]
+            pairs[prefix]['2'] = path
+        else:
+            singles.append(path)
+
+    # Files that couldn't form pairs are considered singles
+    for prefix, files in pairs.items():
+        if '1' not in files or '2' not in files:
+            for f in files.values():
+                singles.append(f)
+            pairs[prefix] = None  # mark as invalid pair
+
+    # Open output file
+    with open(args.output, 'w') as out_handle:
+        # Interleave valid pairs
+        for prefix, files in pairs.items():
+            if files is not None:
+                interleave_pair(files['1'], files['2'], out_handle)
+
+        # Add unpaired files
+        for fq in singles:
+            write_single(fq, out_handle)
 
 if __name__ == "__main__":
-    if len(sys.argv) < 4 or (len(sys.argv[1:]) - 1) % 2 != 0:
-        print(f"Usage: {sys.argv[0]} <output.interleaved.fastq> <R1_1> <R2_1> [<R1_2> <R2_2> ...]")
-        sys.exit(1)
-
-    out_path = sys.argv[1]
-    input_files = sys.argv[2:]
-    pairs = list(zip(input_files[::2], input_files[1::2]))
-
-    interleave_multiple_samples(pairs, out_path)
-    print(f"Interleaved FASTQ written to {out_path}")
+    main()
 
