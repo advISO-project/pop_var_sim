@@ -95,7 +95,7 @@ chrom_1	  366	T	C
 
 ### Example BED File
 This is a tab-separated BED file. An example is shown below (columns `#CHROM`, `START`, and `END` are **required**. All other columns are optional and will not be used).
-> COORDINATES IN THIS FILE ARE EXPECTED TO BE 0-BASED
+> COORDINATES IN THIS FILE ARE EXPECTED TO BE 0-based "half-open"
 ```tsv
 #CHROM	  START	    END	     DESC
 chrom_1	  145388	145662	 chrom_1-145388-145662-amplicon
