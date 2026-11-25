@@ -8,12 +8,20 @@ process run_art {
     tag { sample_id }
 
     input:
-        tuple val(sample_id), val(haplotype_label), path(genome), val(read_count), val(is_amplicon) 
+        tuple val(sample_id), val(haplotype_label), path(genome), val(read_count), val(is_amplicon)
+        val read_length
+        val seq_system
+        val is_paired_end
+        val std_dev
+        val mean_frag_len
+        val random_seed
 
     output:
         tuple val(sample_id), path("*.fq")
 
     script:
+        def args = task.ext.args ?: ''
+        def paired_flag = is_paired_end ? "-p" : ""
         if (is_amplicon)
             """
             art_illumina \
@@ -23,7 +31,13 @@ process run_art {
                 -d "${haplotype_label}" \
                 -na \
                 -amp \
-                ${params.art_params}
+                -l $read_length \
+                -ss $seq_system \
+                $paired_flag \
+                -s $std_dev \
+                -m $mean_frag_len \
+                -rs $random_seed \
+                $args
             """
         else
             """
@@ -33,7 +47,13 @@ process run_art {
                 -o "${sample_id}.${haplotype_label}_" \
                 -d "${haplotype_label}" \
                 -na \
-                ${params.art_params}
+                -l $read_length \
+                -ss $seq_system \
+                $paired_flag \
+                -s $std_dev \
+                -m $mean_frag_len \
+                -rs $random_seed \
+                $args
             """
 
     stub:

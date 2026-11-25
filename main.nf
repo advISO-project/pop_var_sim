@@ -41,7 +41,15 @@ workflow {
                 }
         }
 
-    run_art(simulation_in_ch) // run_art.out is like [sample_1, sample_1.haplo1_1.fq, sample_1.haplo1_2.fq]
+    run_art(
+        simulation_in_ch,
+        params.art_read_length,
+        params.art_seq_system,
+        params.art_is_paired_end,
+        params.art_std_dev,
+        params.art_mean_frag_len,
+        params.art_random_seed
+    )
 
     // collapse run_art.out so it is like [sample_1, [sample_1.haplo1_1.fq, sample_1.haplo1_2.fq, sample_1.haplo2_1.fq, sample_1.haplo2_2.fq, ...] 
 
@@ -83,7 +91,7 @@ workflow {
 }
 
 def parse_manifest(manifest_path) {
-    def rows = Channel
+    def rows = channel
         .fromPath(manifest_path)
         .splitCsv(header: true, sep: ',')
 
@@ -141,5 +149,5 @@ def parse_sample_design(sample_design_file) {
             }
     }
 
-    return Channel.from(flattened_design_data) // [[sample_id, haplotype1, haplotype_fraction_total_reads]]]
+    return channel.from(flattened_design_data) // [[sample_id, haplotype1, haplotype_fraction_total_reads]]]
 }

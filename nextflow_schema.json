@@ -40,9 +40,53 @@
       "type": "string",
       "description": "Name of the run."
     },
-    "art_params": {
+    "art_read_length": {
+      "type": "integer",
+      "default": 150,
+      "description": "Read length for ART simulation (-l)."
+    },
+    "art_random_seed": {
+      "type": "integer",
+      "default": 42,
+      "description": "Random seed for reproducibility (-rs)."
+    },
+    "art_seq_system": {
       "type": "string",
-      "description": "Parameters for art."
+      "default": "MSv3",
+      "description": "Sequencing system profile (-ss).",
+      "enum": [
+        "GA1",
+        "GA2",
+        "HS10",
+        "HS20",
+        "HS25",
+        "HSXn",
+        "HSXt",
+        "MinS",
+        "MSv1",
+        "MSv3",
+        "NS50"
+      ]
+    },
+    "art_is_paired_end": {
+      "type": "boolean",
+      "default": true,
+      "description": "Generate paired-end reads (-p)."
+    },
+    "art_std_dev": {
+      "type": "number",
+      "default": 20,
+      "description": "Standard deviation of fragment lengths (-s)."
+    },
+    "art_mean_frag_len": {
+      "type": "integer",
+      "default": 250,
+      "description": "Mean fragment length for paired-end reads (-m)."
+    },
+    "art_additional": {
+      "type": "string",
+      "default": "",
+      "description": "Any extra ART flags not covered by the named parameters, e.g. '-ef' for error-free reads."
     },
     "_trace_timestamp": {
       "type": "string",
