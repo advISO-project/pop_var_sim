@@ -45,7 +45,7 @@ workflow {
         simulation_in_ch,
         params.art_read_length,
         params.art_seq_system,
-        params.art_paired_end,
+        params.art_is_paired_end,
         params.art_std_dev,
         params.art_mean_frag_len,
         params.art_random_seed

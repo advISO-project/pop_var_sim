@@ -68,7 +68,7 @@
         "NS50"
       ]
     },
-    "art_paired_end": {
+    "art_is_paired_end": {
       "type": "boolean",
       "default": true,
       "description": "Generate paired-end reads (-p)."
